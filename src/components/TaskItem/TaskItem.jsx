@@ -1,8 +1,11 @@
 import React, { useState } from "react";
-import { Box, Typography, Checkbox } from "@mui/material";
+import { Box, Typography, Checkbox, IconButton, Button } from "@mui/material";
+import { CheckCircle, CircleOutlined } from "@mui/icons-material";
+import DeleteForeverOutlined from "@mui/icons-material/DeleteForeverOutlined";
 
-function TaskItem({ task, onTaskUpdate, onTaskClick }) {
+function TaskItem({ task, onTaskUpdate, onTaskClick, handleTaskItemDelete }) {
   const [hovered, setHovered] = useState(false);
+
   const handleCheckboxChange = (e) => {
     e.stopPropagation();
     onTaskUpdate(task.id, e.target.checked);
@@ -11,6 +14,7 @@ function TaskItem({ task, onTaskUpdate, onTaskClick }) {
   return (
     <Box
       sx={{
+        position: "relative", // for absolute positioning of the delete button
         p: 1,
         mb: 1,
         borderRadius: 1,
@@ -39,13 +43,15 @@ function TaskItem({ task, onTaskUpdate, onTaskClick }) {
       >
         <Checkbox
           size="small"
+          icon={<CircleOutlined />}
+          checkedIcon={<CheckCircle />}
           sx={{ p: 0 }}
           checked={task.dueComplete}
           onClick={handleCheckboxChange}
         />
       </Box>
 
-      {/* Task Title with a margin-left that aligns with the expanded checkbox container */}
+      {/* Task Title */}
       <Typography
         variant="body2"
         sx={{
@@ -55,6 +61,25 @@ function TaskItem({ task, onTaskUpdate, onTaskClick }) {
       >
         {task.name}
       </Typography>
+
+      {/* Delete Button positioned absolutely */}
+      <IconButton
+        onClick={(e) => {
+          e.stopPropagation();
+          handleTaskItemDelete(task.id);
+        }}
+        sx={{
+          position: "absolute",
+          right: 8,
+          top: "50%",
+          transform: "translateY(-50%)",
+          opacity: hovered ? 1 : 0,
+          transition: "opacity 0.5s",
+          pointerEvents: hovered ? "auto" : "none",
+        }}
+      >
+        <DeleteForeverOutlined sx={{ color: "red" }} />
+      </IconButton>
     </Box>
   );
 }

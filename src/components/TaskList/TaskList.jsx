@@ -10,13 +10,15 @@ import {
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import TaskItem from "../TaskItem/TaskItem";
 import {
+  archiveCardItem,
   createCard,
   getTasksInList,
   updateDueComplete,
 } from "../../services/trelloApi";
 import TaskDetailsModal from "../modals/TaskDetailsModal";
+import { Close, DeleteForeverOutlined } from "@mui/icons-material";
 
-function TaskList({ title, taskId }) {
+function TaskList({ title, taskId, handleTaskListDelete }) {
   const [addingCard, setAddingCard] = useState(false);
   const [newCardTitle, setNewCardTitle] = useState("");
   const [tasks, setTasks] = useState([]);
@@ -67,7 +69,12 @@ function TaskList({ title, taskId }) {
       console.error("Failed to update task:", error);
     }
   };
-
+  const handleTaskItemDelete = async (taskId) => {
+    archiveCardItem(taskId).then((res) => {
+      setTasks((prev) => prev.filter((task) => task.id !== taskId));
+      console.log(res);
+    });
+  };
   return (
     <Paper
       sx={{
@@ -81,13 +88,25 @@ function TaskList({ title, taskId }) {
       }}
     >
       {/* List Header */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 2,
+        }}
+      >
         <Typography variant="subtitle1" fontWeight="bold">
           {title}
         </Typography>
-        <IconButton size="small">
-          <MoreHorizIcon />
-        </IconButton>
+        <Button
+          onClick={() => {
+            handleTaskListDelete(taskId);
+          }}
+          sx={{ minWidth: 0, fontSize: "12px", color: "text.primary" }}
+        >
+          <Close />
+        </Button>
       </Box>
       {/* Render Each Task */}
       <Box sx={{ overflow: "auto", maxHeight: "55vh" }}>
@@ -97,6 +116,7 @@ function TaskList({ title, taskId }) {
             task={task}
             onTaskUpdate={handleTaskUpdate}
             onTaskClick={handleTaskClick}
+            handleTaskItemDelete={handleTaskItemDelete}
           />
         ))}
 
@@ -136,7 +156,7 @@ function TaskList({ title, taskId }) {
               Add card
             </Button>
             <IconButton size="small" onClick={handleCancelAdd}>
-              ✕
+              <Close />
             </IconButton>
           </Box>
         </Box>

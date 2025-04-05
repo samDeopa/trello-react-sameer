@@ -9,20 +9,20 @@ import Button from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 
 // A styled component that applies a blur background
-const BlurredAppBar = styled(AppBar)(({ theme }) => ({
+const BlurredAppBar = styled(AppBar)(() => ({
   backdropFilter: "blur(10px)",
   backgroundColor: "rgba(255, 255, 255, 0.4)",
   boxShadow: "none",
   borderRadius: 100,
 }));
 
-export default function BoardAppBar() {
+export default function BoardAppBar({ title }) {
   return (
     <BlurredAppBar position="sticky">
       <Toolbar sx={{ minHeight: 56 }}>
         <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1 }}>
           <Typography variant="h6" noWrap sx={{ mr: 2, fontWeight: 600 }}>
-            T Board
+            {title}
           </Typography>
           {/* Star Icon (placeholder) */}
           <IconButton aria-label="star board" sx={{ mr: 2 }}>

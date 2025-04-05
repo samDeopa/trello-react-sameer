@@ -44,7 +44,7 @@ function Header() {
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <Icon sx={{ margin: 2 }}>
-            <img src="trello-icon.png" alt="Trello Logo" />
+            <img src="/trello-icon.png" alt="Trello Logo" />
           </Icon>
           <Typography
             variant="h6"

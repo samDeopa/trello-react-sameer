@@ -26,31 +26,31 @@ export const createBoard = (board) => {
 };
 
 export const getBoard = (id) => {
-  return trelloApi.get(`https://trello.com/1/board/${id}`);
+  return trelloApi.get(`/board/${id}`);
 };
 
 export const getList = (boardId) => {
-  return trelloApi.get(`https://api.trello.com/1/boards/${boardId}/lists`);
+  return trelloApi.get(`/boards/${boardId}/lists`);
 };
 
 export const createList = (boardId, listName) => {
-  return trelloApi.post(`https://api.trello.com/1/boards/${boardId}/lists`, {
+  return trelloApi.post(`/boards/${boardId}/lists`, {
     name: listName,
   });
 };
 
-export const deleteList = (listId) => {
-  return trelloApi.delete(`https://api.trello.com/1/lists/${listId}/closed`, {
-    value: true,
+export const archiveList = (listId) => {
+  return trelloApi.put(`/lists/${listId}`, {
+    closed: true,
   });
 };
 
 export const getTasksInList = (listId) => {
-  return trelloApi.get(`https://api.trello.com/1/lists/${listId}/cards`);
+  return trelloApi.get(`/lists/${listId}/cards`);
 };
 
 export const createCard = (listId, title) => {
-  return trelloApi.post(`https://trello.com/1/cards`, {
+  return trelloApi.post(`/cards`, {
     idList: listId,
     name: title,
     closed: false,
@@ -59,8 +59,12 @@ export const createCard = (listId, title) => {
   });
 };
 
+export const archiveCardItem = (taskId) => {
+  return trelloApi.put(`cards/${taskId}`, { closed: true });
+};
+
 export const updateDueComplete = (taskId, completed) => {
-  return trelloApi.put(`https://trello.com/1/cards/${taskId}`, {
+  return trelloApi.put(`/cards/${taskId}`, {
     dueComplete: completed,
   });
 };
@@ -86,5 +90,13 @@ export const addChecklistItem = (checklistId, name) => {
     name: name,
     checked: false,
   });
+};
+
+export const deleteCheckList = (checklistId) => {
+  return trelloApi.delete(`/checklists/${checklistId}`);
+};
+
+export const deleteChecklistItem = (checklistId, itemId) => {
+  return trelloApi.delete(`/checklists/${checklistId}/checkItems/${itemId}`);
 };
 export default trelloApi;

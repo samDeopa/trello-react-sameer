@@ -1,10 +1,16 @@
 import { Box, Container } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getBoard, getList } from "../services/trelloApi";
+import {
+  archiveList,
+  createList,
+  getBoard,
+  getList,
+} from "../services/trelloApi";
 import Header from "../components/common/Header";
 import BoardAppBar from "../components/BoardAppBar/BoardAppBar";
 import TaskList from "../components/TaskList/TaskList";
+import AddTaskList from "../components/AddTaskList/AddTaskList";
 
 const Board = () => {
   const [taskLists, setTaskLists] = useState([]);
@@ -24,6 +30,22 @@ const Board = () => {
       setTaskLists(res.data);
     });
   }, []);
+  const handleListAdd = (newListTitle) => {
+    createList(id, newListTitle).then((res) => {
+      console.log(res.data);
+      setTaskLists([...taskLists, res.data]);
+    });
+  };
+  const handleTaskListDelete = async (tasklistid) => {
+    try {
+      await archiveList(tasklistid);
+      setTaskLists((prev) =>
+        prev.filter((taskList) => taskList.id !== tasklistid)
+      );
+    } catch (error) {
+      console.error("Failed to delete checklist:", error);
+    }
+  };
   return (
     <>
       <Header />
@@ -37,7 +59,7 @@ const Board = () => {
         }}
       >
         <Container maxWidth="xl">
-          <BoardAppBar />
+          <BoardAppBar title={board.name} />
           <Box
             sx={{
               display: "flex",
@@ -47,9 +69,7 @@ const Board = () => {
               flexWrap: "nowrap",
               overflowX: "auto",
               scrollbarWidth: "none",
-              "&::-webkit-scrollbar": {
-                display: "none",
-              },
+
               marginTop: "30px",
             }}
           >
@@ -58,8 +78,11 @@ const Board = () => {
                 key={taskList.id}
                 title={taskList.name}
                 taskId={taskList.id}
+                handleListAdd={handleListAdd}
+                handleTaskListDelete={handleTaskListDelete}
               />
             ))}
+            <AddTaskList handleListAdd={handleListAdd} />
           </Box>
         </Container>
       </Box>

@@ -19,12 +19,16 @@ import {
   updateChecklistItem,
   createChecklist,
   addChecklistItem,
+  deleteCheckList,
+  deleteChecklistItem,
 } from "../../services/trelloApi";
+import { Close, DeleteForeverOutlined } from "@mui/icons-material";
 
 const TaskDetailsModal = ({ task, open, onClose }) => {
   const [checklists, setChecklists] = useState([]);
   const [newChecklistName, setNewChecklistName] = useState("");
-  const [newItemName, setNewItemName] = useState("");
+  // Instead of a single string, use an object to store new item names per checklist
+  const [newItemNames, setNewItemNames] = useState({});
 
   useEffect(() => {
     if (open && task) {
@@ -60,7 +64,8 @@ const TaskDetailsModal = ({ task, open, onClose }) => {
   };
 
   const handleAddChecklistItem = async (checklistId) => {
-    if (!newItemName.trim()) return;
+    const newItemName = newItemNames[checklistId];
+    if (!newItemName || !newItemName.trim()) return;
     const res = await addChecklistItem(checklistId, newItemName);
     setChecklists((prev) =>
       prev.map((checklist) =>
@@ -69,7 +74,40 @@ const TaskDetailsModal = ({ task, open, onClose }) => {
           : checklist
       )
     );
-    setNewItemName("");
+    // Clear the input for this specific checklist
+    setNewItemNames((prev) => ({ ...prev, [checklistId]: "" }));
+  };
+
+  const handleDeleteChecklist = async (checklistId) => {
+    try {
+      await deleteCheckList(checklistId);
+      setChecklists((prev) =>
+        prev.filter((checklist) => checklist.id !== checklistId)
+      );
+    } catch (error) {
+      console.error("Failed to delete checklist:", error);
+    }
+  };
+
+  // New: Delete individual checklist item
+  const handleDeleteChecklistItem = async (checklistId, itemId) => {
+    try {
+      await deleteChecklistItem(checklistId, itemId);
+      setChecklists((prev) =>
+        prev.map((checklist) =>
+          checklist.id === checklistId
+            ? {
+                ...checklist,
+                checkItems: checklist.checkItems.filter(
+                  (item) => item.id !== itemId
+                ),
+              }
+            : checklist
+        )
+      );
+    } catch (error) {
+      console.error("Failed to delete checklist item:", error);
+    }
   };
 
   return (
@@ -104,12 +142,7 @@ const TaskDetailsModal = ({ task, open, onClose }) => {
         </IconButton>
       </DialogTitle>
 
-      <DialogContent
-        sx={{
-          pt: 2,
-          pb: 2,
-        }}
-      >
+      <DialogContent sx={{ pt: 2, pb: 2 }}>
         {/* Existing Checklists */}
         {checklists.map((checklist) => (
           <Box
@@ -121,9 +154,23 @@ const TaskDetailsModal = ({ task, open, onClose }) => {
               backgroundColor: "#f9f9f9",
             }}
           >
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-              {checklist.name}
-            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                {checklist.name}
+              </Typography>
+              <Button
+                onClick={() => handleDeleteChecklist(checklist.id)}
+                sx={{ minWidth: 0 }}
+              >
+                <Close sx={{ color: "text.primary" }} />
+              </Button>
+            </Box>
 
             <List disablePadding>
               {checklist.checkItems.map((item) => (
@@ -133,11 +180,11 @@ const TaskDetailsModal = ({ task, open, onClose }) => {
                   sx={{
                     display: "flex",
                     alignItems: "center",
-
                     borderBottom: "1px solid #ececec",
                     "&:last-child": {
                       borderBottom: "none",
                     },
+                    paddingX: "20px",
                   }}
                 >
                   <Checkbox
@@ -147,10 +194,16 @@ const TaskDetailsModal = ({ task, open, onClose }) => {
                     }
                     sx={{ mr: 1 }}
                   />
-                  <ListItemText
-                    primary={item.name}
-                    primaryTypographyProps={{ variant: "body2" }}
-                  />
+                  <ListItemText primary={item.name} />
+                  <IconButton
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteChecklistItem(checklist.id, item.id);
+                    }}
+                  >
+                    <DeleteForeverOutlined sx={{ color: "red" }} />
+                  </IconButton>
                 </ListItem>
               ))}
             </List>
@@ -160,8 +213,13 @@ const TaskDetailsModal = ({ task, open, onClose }) => {
               <TextField
                 size="small"
                 placeholder="Add an item"
-                value={newItemName}
-                onChange={(e) => setNewItemName(e.target.value)}
+                value={newItemNames[checklist.id] || ""}
+                onChange={(e) =>
+                  setNewItemNames((prev) => ({
+                    ...prev,
+                    [checklist.id]: e.target.value,
+                  }))
+                }
                 fullWidth
               />
               <Button
