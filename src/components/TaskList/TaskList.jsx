@@ -9,13 +9,19 @@ import {
 } from "@mui/material";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import TaskItem from "../TaskItem/TaskItem";
-import { createCard, getTasksInList } from "../../services/trelloApi";
+import {
+  createCard,
+  getTasksInList,
+  updateDueComplete,
+} from "../../services/trelloApi";
+import TaskDetailsModal from "../modals/TaskDetailsModal";
 
 function TaskList({ title, taskId }) {
-  // Track whether we are adding a card
   const [addingCard, setAddingCard] = useState(false);
   const [newCardTitle, setNewCardTitle] = useState("");
   const [tasks, setTasks] = useState([]);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
   useEffect(() => {
     getTasksInList(taskId).then((res) => {
       console.log("logging tasks in list", res.data);
@@ -45,13 +51,29 @@ function TaskList({ title, taskId }) {
     setNewCardTitle("");
     setAddingCard(false);
   };
+  const handleTaskClick = (task) => {
+    setSelectedTask(task);
+    setModalOpen(true);
+  };
+  const handleTaskUpdate = async (taskId, completed) => {
+    try {
+      await updateDueComplete(taskId, completed);
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task.id === taskId ? { ...task, dueComplete: completed } : task
+        )
+      );
+    } catch (error) {
+      console.error("Failed to update task:", error);
+    }
+  };
 
   return (
     <Paper
       sx={{
-        minWidth: "300px", // minWidth ensures it doesn't shrink
+        minWidth: "300px",
         width: "300px",
-        flexShrink: 0, // Important: Prevents shrinking in flex
+        flexShrink: 0,
         p: 2,
         borderRadius: 2,
         backgroundColor: "#f4f5f7",
@@ -70,8 +92,19 @@ function TaskList({ title, taskId }) {
       {/* Render Each Task */}
       <Box sx={{ overflow: "auto", maxHeight: "55vh" }}>
         {tasks.map((task) => (
-          <TaskItem key={task.id} task={task} />
+          <TaskItem
+            key={task.id}
+            task={task}
+            onTaskUpdate={handleTaskUpdate}
+            onTaskClick={handleTaskClick}
+          />
         ))}
+
+        <TaskDetailsModal
+          task={selectedTask}
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+        />
       </Box>
 
       {/* Add Card Section */}

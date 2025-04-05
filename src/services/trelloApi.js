@@ -16,7 +16,7 @@ export const getBoards = () => {
 };
 
 export const createBoard = (board) => {
-  return trelloApi.post(`https://api.trello.com/1/boards/`, {
+  return trelloApi.post(`/boards/`, {
     name: board.title,
     defaultLists: false,
     prefs_background_url:
@@ -56,6 +56,35 @@ export const createCard = (listId, title) => {
     closed: false,
     isTemplate: false,
     dueComplete: false,
+  });
+};
+
+export const updateDueComplete = (taskId, completed) => {
+  return trelloApi.put(`https://trello.com/1/cards/${taskId}`, {
+    dueComplete: completed,
+  });
+};
+
+export const getChecklists = (cardId) => {
+  return trelloApi.get(`/cards/${cardId}/checklists`);
+};
+
+export const updateChecklistItem = (cardId, checkItemId, completed) => {
+  return trelloApi.put(`/cards/${cardId}/checkItem/${checkItemId}`, {
+    state: completed ? "complete" : "incomplete",
+  });
+};
+
+export const createChecklist = (cardId, name) => {
+  return trelloApi.post(`/cards/${cardId}/checklists`, {
+    name: name,
+  });
+};
+
+export const addChecklistItem = (checklistId, name) => {
+  return trelloApi.post(`/checklists/${checklistId}/checkItems`, {
+    name: name,
+    checked: false,
   });
 };
 export default trelloApi;

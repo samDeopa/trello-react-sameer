@@ -46,9 +46,9 @@ const Board = () => {
               paddingX: 2,
               flexWrap: "nowrap",
               overflowX: "auto",
-              scrollbarWidth: "none", // Firefox
+              scrollbarWidth: "none",
               "&::-webkit-scrollbar": {
-                display: "none", // Chrome, Safari, Edge
+                display: "none",
               },
               marginTop: "30px",
             }}

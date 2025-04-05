@@ -1,8 +1,12 @@
 import React, { useState } from "react";
 import { Box, Typography, Checkbox } from "@mui/material";
 
-function TaskItem({ task }) {
+function TaskItem({ task, onTaskUpdate, onTaskClick }) {
   const [hovered, setHovered] = useState(false);
+  const handleCheckboxChange = (e) => {
+    e.stopPropagation();
+    onTaskUpdate(task.id, e.target.checked);
+  };
 
   return (
     <Box
@@ -21,6 +25,7 @@ function TaskItem({ task }) {
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onClick={() => onTaskClick(task)}
     >
       {/* Checkbox Container */}
       <Box
@@ -34,8 +39,9 @@ function TaskItem({ task }) {
       >
         <Checkbox
           size="small"
-          sx={{ p: 0, borderRadius: "50%" }}
+          sx={{ p: 0 }}
           checked={task.dueComplete}
+          onClick={handleCheckboxChange}
         />
       </Box>
 

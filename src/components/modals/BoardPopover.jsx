@@ -14,7 +14,6 @@ import { styled } from "@mui/material/styles";
 import { createBoard } from "../../services/trelloApi";
 import { useBoardContext } from "../../context/BoardContext";
 
-// Example background image options
 const backgroundOptions = [
   "https://trello-backgrounds.s3.amazonaws.com/SharedBackground/480x320/6566fcc49ee3c03f225dc13229ffb5af/photo-1742156345582-b857d994c84e.webp",
   "https://d2k1ftgv7pobq7.cloudfront.net/images/backgrounds/cosmos/small.jpg",
