@@ -1,3 +1,4 @@
+// src/components/modals/TaskDetailsModal.jsx
 import {
   Dialog,
   DialogTitle,
@@ -13,101 +14,63 @@ import {
   Typography,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { useEffect, useState } from "react";
-import {
-  getChecklists,
-  updateChecklistItem,
-  createChecklist,
-  addChecklistItem,
-  deleteCheckList,
-  deleteChecklistItem,
-} from "../../services/trelloApi";
+import { useEffect } from "react";
 import { Close, DeleteForeverOutlined } from "@mui/icons-material";
+import { useTaskDetailsContext } from "../../context/TaskDetailContext";
 
 const TaskDetailsModal = ({ task, open, onClose }) => {
-  const [checklists, setChecklists] = useState([]);
-  const [newChecklistName, setNewChecklistName] = useState("");
-  // Instead of a single string, use an object to store new item names per checklist
-  const [newItemNames, setNewItemNames] = useState({});
+  const {
+    state: { checklists, newChecklistName, newItemNames },
+    dispatch,
+    loadChecklists,
+    updateChecklistItemStatus,
+    addChecklist,
+    addChecklistItemToChecklist,
+    deleteChecklistById,
+    deleteChecklistItemById,
+  } = useTaskDetailsContext();
 
+  // Load checklists when modal opens
   useEffect(() => {
     if (open && task) {
-      getChecklists(task.id).then((res) => {
-        setChecklists(res.data);
-      });
+      loadChecklists(task.id);
     }
-  }, [open, task]);
+  }, [open, task, loadChecklists]);
 
-  const handleChecklistToggle = async (checkItemId, checked) => {
-    try {
-      await updateChecklistItem(task.id, checkItemId, checked);
-      setChecklists((prev) =>
-        prev.map((checklist) => ({
-          ...checklist,
-          checkItems: checklist.checkItems.map((item) =>
-            item.id === checkItemId
-              ? { ...item, state: checked ? "complete" : "incomplete" }
-              : item
-          ),
-        }))
-      );
-    } catch (error) {
-      console.error("Failed to update checklist item:", error);
-    }
+  // Handlers for input changes using dispatch
+  const handleNewChecklistNameChange = (e) => {
+    dispatch({ type: "UPDATE_NEW_CHECKLIST_NAME", payload: e.target.value });
   };
 
+  const handleNewItemNameChange = (checklistId, value) => {
+    dispatch({
+      type: "UPDATE_NEW_ITEM_NAME",
+      payload: { checklistId, value },
+    });
+  };
+
+  // Local handler to wrap API call
   const handleAddChecklist = async () => {
     if (!newChecklistName.trim()) return;
-    const res = await createChecklist(task.id, newChecklistName);
-    setChecklists([...checklists, res.data]);
-    setNewChecklistName("");
+    await addChecklist(task.id, newChecklistName);
   };
 
   const handleAddChecklistItem = async (checklistId) => {
     const newItemName = newItemNames[checklistId];
     if (!newItemName || !newItemName.trim()) return;
-    const res = await addChecklistItem(checklistId, newItemName);
-    setChecklists((prev) =>
-      prev.map((checklist) =>
-        checklist.id === checklistId
-          ? { ...checklist, checkItems: [...checklist.checkItems, res.data] }
-          : checklist
-      )
-    );
-    // Clear the input for this specific checklist
-    setNewItemNames((prev) => ({ ...prev, [checklistId]: "" }));
+    await addChecklistItemToChecklist(checklistId, newItemName);
   };
 
   const handleDeleteChecklist = async (checklistId) => {
-    try {
-      await deleteCheckList(checklistId);
-      setChecklists((prev) =>
-        prev.filter((checklist) => checklist.id !== checklistId)
-      );
-    } catch (error) {
-      console.error("Failed to delete checklist:", error);
-    }
+    await deleteChecklistById(checklistId);
   };
 
-  // New: Delete individual checklist item
   const handleDeleteChecklistItem = async (checklistId, itemId) => {
-    try {
-      await deleteChecklistItem(checklistId, itemId);
-      setChecklists((prev) =>
-        prev.map((checklist) =>
-          checklist.id === checklistId
-            ? {
-                ...checklist,
-                checkItems: checklist.checkItems.filter(
-                  (item) => item.id !== itemId
-                ),
-              }
-            : checklist
-        )
-      );
-    } catch (error) {
-      console.error("Failed to delete checklist item:", error);
-    }
+    await deleteChecklistItemById(checklistId, itemId);
+  };
+
+  const handleChecklistToggle = async (checkItemId, checked, checklistId) => {
+    await updateChecklistItemStatus(task.id, checklistId, checkItemId, checked);
   };
 
   return (
@@ -181,16 +144,18 @@ const TaskDetailsModal = ({ task, open, onClose }) => {
                     display: "flex",
                     alignItems: "center",
                     borderBottom: "1px solid #ececec",
-                    "&:last-child": {
-                      borderBottom: "none",
-                    },
+                    "&:last-child": { borderBottom: "none" },
                     paddingX: "20px",
                   }}
                 >
                   <Checkbox
                     checked={item.state === "complete"}
                     onChange={(e) =>
-                      handleChecklistToggle(item.id, e.target.checked)
+                      handleChecklistToggle(
+                        item.id,
+                        e.target.checked,
+                        checklist.id
+                      )
                     }
                     sx={{ mr: 1 }}
                   />
@@ -215,10 +180,7 @@ const TaskDetailsModal = ({ task, open, onClose }) => {
                 placeholder="Add an item"
                 value={newItemNames[checklist.id] || ""}
                 onChange={(e) =>
-                  setNewItemNames((prev) => ({
-                    ...prev,
-                    [checklist.id]: e.target.value,
-                  }))
+                  handleNewItemNameChange(checklist.id, e.target.value)
                 }
                 fullWidth
               />
@@ -234,13 +196,7 @@ const TaskDetailsModal = ({ task, open, onClose }) => {
         ))}
 
         {/* Create New Checklist */}
-        <Box
-          sx={{
-            mt: 3,
-            pt: 2,
-            borderTop: "1px solid #e0e0e0",
-          }}
-        >
+        <Box sx={{ mt: 3, pt: 2, borderTop: "1px solid #e0e0e0" }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
             Add Checklist
           </Typography>
@@ -249,7 +205,7 @@ const TaskDetailsModal = ({ task, open, onClose }) => {
               size="small"
               placeholder="Checklist title"
               value={newChecklistName}
-              onChange={(e) => setNewChecklistName(e.target.value)}
+              onChange={handleNewChecklistNameChange}
               fullWidth
             />
             <Button variant="contained" onClick={handleAddChecklist}>

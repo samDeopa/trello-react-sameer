@@ -11,6 +11,7 @@ import Header from "../components/common/Header";
 import BoardAppBar from "../components/BoardAppBar/BoardAppBar";
 import TaskList from "../components/TaskList/TaskList";
 import AddTaskList from "../components/AddTaskList/AddTaskList";
+import { TaskDetailsProvider } from "../context/TaskDetailContext";
 
 const Board = () => {
   const [taskLists, setTaskLists] = useState([]);
@@ -60,30 +61,32 @@ const Board = () => {
       >
         <Container maxWidth="xl">
           <BoardAppBar title={board.name} />
-          <Box
-            sx={{
-              display: "flex",
-              gap: 2,
-              alignItems: "flex-start",
-              paddingX: 2,
-              flexWrap: "nowrap",
-              overflowX: "auto",
-              scrollbarWidth: "none",
+          <TaskDetailsProvider>
+            <Box
+              sx={{
+                display: "flex",
+                gap: 2,
+                alignItems: "flex-start",
+                paddingX: 2,
+                flexWrap: "nowrap",
+                overflowX: "auto",
+                scrollbarWidth: "none",
 
-              marginTop: "30px",
-            }}
-          >
-            {taskLists.map((taskList) => (
-              <TaskList
-                key={taskList.id}
-                title={taskList.name}
-                taskId={taskList.id}
-                handleListAdd={handleListAdd}
-                handleTaskListDelete={handleTaskListDelete}
-              />
-            ))}
-            <AddTaskList handleListAdd={handleListAdd} />
-          </Box>
+                marginTop: "30px",
+              }}
+            >
+              {taskLists.map((taskList) => (
+                <TaskList
+                  key={taskList.id}
+                  title={taskList.name}
+                  taskId={taskList.id}
+                  handleListAdd={handleListAdd}
+                  handleTaskListDelete={handleTaskListDelete}
+                />
+              ))}
+              <AddTaskList handleListAdd={handleListAdd} />
+            </Box>
+          </TaskDetailsProvider>
         </Container>
       </Box>
     </>
