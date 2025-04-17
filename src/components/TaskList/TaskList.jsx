@@ -7,7 +7,6 @@ import {
   TextField,
   Button,
 } from "@mui/material";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import TaskItem from "../TaskItem/TaskItem";
 import {
   archiveCardItem,
