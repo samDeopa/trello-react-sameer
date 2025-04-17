@@ -1,21 +1,18 @@
 import { Box, Typography } from "@mui/material";
 import BoardList from "../BoardList/BoardList";
 import { useEffect } from "react";
-import { getBoards } from "../../services/trelloApi";
-import { useBoardContext } from "../../context/BoardContext";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchBoards } from "../../features/boards/BoardSlice";
 
 const WorkSpace = () => {
-  const { boards, setBoards } = useBoardContext();
+  const dispatch = useDispatch();
+  const { boards, loading } = useSelector((state) => state.boards);
 
   useEffect(() => {
-    getBoards()
-      .then(({ data }) => {
-        setBoards(data);
-      })
-      .catch((err) => {
-        console.error("Error fetching boards:", err);
-      });
-  }, []);
+    if (loading === false) {
+      dispatch(fetchBoards());
+    }
+  }, [loading, dispatch]);
 
   return (
     <Box sx={{ paddingTop: 10 }}>

@@ -20,7 +20,7 @@ export const createBoard = (board) => {
     name: board.title,
     defaultLists: false,
     prefs_background_url:
-      "https://images.unsplash.com/photo-1742156345582-b857d994c84e?ixid=M3w3MDY2fDB8MXxjb2xsZWN0aW9ufDF8MzE3MDk5fHx8fHwyfHwxNzQzNzYwNDk4fA&ixlib=rb-4.0.3&w=2560&h=2048&q=90",
+      "https://images.unsplash.com/photo-1742937163916-78fd07cc3b49?ixlib=rb-4.0.3\u0026q=85\u0026fm=jpg\u0026crop=entropy\u0026cs=srgb",
     prefs_permissionLevel: "org",
   });
 };

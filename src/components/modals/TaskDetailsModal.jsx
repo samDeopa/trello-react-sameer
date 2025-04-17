@@ -1,4 +1,5 @@
 // src/components/modals/TaskDetailsModal.jsx
+import React, { useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -14,63 +15,58 @@ import {
   Typography,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { useEffect } from "react";
-import { Close, DeleteForeverOutlined } from "@mui/icons-material";
-import { useTaskDetailsContext } from "../../context/TaskDetailContext";
+import { DeleteForeverOutlined } from "@mui/icons-material";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  fetchChecklists,
+  toggleChecklistItem,
+  createNewChecklist,
+  addItemToChecklist,
+  removeChecklist,
+  removeChecklistItem,
+  setNewChecklistName,
+  setNewItemName,
+} from "../../features/taskDetail/taskDetailsSlice";
 
 const TaskDetailsModal = ({ task, open, onClose }) => {
-  const {
-    state: { checklists, newChecklistName, newItemNames },
-    dispatch,
-    loadChecklists,
-    updateChecklistItemStatus,
-    addChecklist,
-    addChecklistItemToChecklist,
-    deleteChecklistById,
-    deleteChecklistItemById,
-  } = useTaskDetailsContext();
+  const dispatch = useDispatch();
+  const { checklists, newChecklistName, newItemNames, loading, error } =
+    useSelector((state) => state.taskDetails);
 
   // Load checklists when modal opens
   useEffect(() => {
     if (open && task) {
-      loadChecklists(task.id);
+      dispatch(fetchChecklists(task.id));
     }
-  }, [open, task, loadChecklists]);
+  }, [open, task, dispatch]);
 
-  // Handlers for input changes using dispatch
-  const handleNewChecklistNameChange = (e) => {
-    dispatch({ type: "UPDATE_NEW_CHECKLIST_NAME", payload: e.target.value });
-  };
-
-  const handleNewItemNameChange = (checklistId, value) => {
-    dispatch({
-      type: "UPDATE_NEW_ITEM_NAME",
-      payload: { checklistId, value },
-    });
-  };
-
-  // Local handler to wrap API call
-  const handleAddChecklist = async () => {
+  const handleAddChecklist = () => {
     if (!newChecklistName.trim()) return;
-    await addChecklist(task.id, newChecklistName);
+    dispatch(createNewChecklist({ taskId: task.id, name: newChecklistName }));
   };
 
-  const handleAddChecklistItem = async (checklistId) => {
-    const newItemName = newItemNames[checklistId];
-    if (!newItemName || !newItemName.trim()) return;
-    await addChecklistItemToChecklist(checklistId, newItemName);
+  const handleAddChecklistItem = (checklistId) => {
+    const name = newItemNames[checklistId]?.trim();
+    if (!name) return;
+    dispatch(addItemToChecklist({ checklistId, name }));
   };
 
-  const handleDeleteChecklist = async (checklistId) => {
-    await deleteChecklistById(checklistId);
+  const handleDeleteChecklist = (checklistId) => {
+    dispatch(removeChecklist(checklistId));
   };
 
-  const handleDeleteChecklistItem = async (checklistId, itemId) => {
-    await deleteChecklistItemById(checklistId, itemId);
+  const handleDeleteChecklistItem = (checklistId, itemId) => {
+    dispatch(removeChecklistItem({ checklistId, itemId }));
   };
 
-  const handleChecklistToggle = async (checkItemId, checked, checklistId) => {
-    await updateChecklistItemStatus(task.id, checklistId, checkItemId, checked);
+  const handleChecklistToggle = (itemId, checked) => {
+    dispatch(
+      toggleChecklistItem({
+        taskId: task.id,
+        itemId,
+        checked,
+      })
+    );
   };
 
   return (
@@ -79,14 +75,7 @@ const TaskDetailsModal = ({ task, open, onClose }) => {
       onClose={onClose}
       fullWidth
       maxWidth="md"
-      slotProps={{
-        paper: {
-          sx: {
-            borderRadius: 3,
-            p: 2,
-          },
-        },
-      }}
+      slotProps={{ paper: { sx: { borderRadius: 3, p: 2 } } }}
     >
       <DialogTitle
         sx={{
@@ -106,17 +95,15 @@ const TaskDetailsModal = ({ task, open, onClose }) => {
       </DialogTitle>
 
       <DialogContent sx={{ pt: 2, pb: 2 }}>
-        {/* Existing Checklists */}
+        {loading === "loading" && <Typography>Loading...</Typography>}
+        {error && <Typography color="error">{error}</Typography>}
+
         {checklists.map((checklist) => (
           <Box
             key={checklist.id}
-            sx={{
-              mb: 3,
-              p: 2,
-              borderRadius: 2,
-              backgroundColor: "#f9f9f9",
-            }}
+            sx={{ mb: 3, p: 2, borderRadius: 2, backgroundColor: "#f9f9f9" }}
           >
+            {/* Checklist Header */}
             <Box
               sx={{
                 display: "flex",
@@ -124,17 +111,18 @@ const TaskDetailsModal = ({ task, open, onClose }) => {
                 alignItems: "center",
               }}
             >
-              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+              <Typography variant="subtitle1" fontWeight={600}>
                 {checklist.name}
               </Typography>
-              <Button
+              <IconButton
+                size="small"
                 onClick={() => handleDeleteChecklist(checklist.id)}
-                sx={{ minWidth: 0 }}
               >
-                <Close sx={{ color: "text.primary" }} />
-              </Button>
+                <DeleteForeverOutlined color="error" />
+              </IconButton>
             </Box>
 
+            {/* Checklist Items */}
             <List disablePadding>
               {checklist.checkItems.map((item) => (
                 <ListItem
@@ -145,49 +133,48 @@ const TaskDetailsModal = ({ task, open, onClose }) => {
                     alignItems: "center",
                     borderBottom: "1px solid #ececec",
                     "&:last-child": { borderBottom: "none" },
-                    paddingX: "20px",
+                    px: 2,
                   }}
                 >
                   <Checkbox
                     checked={item.state === "complete"}
                     onChange={(e) =>
-                      handleChecklistToggle(
-                        item.id,
-                        e.target.checked,
-                        checklist.id
-                      )
+                      handleChecklistToggle(item.id, e.target.checked)
                     }
                     sx={{ mr: 1 }}
                   />
                   <ListItemText primary={item.name} />
                   <IconButton
                     size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteChecklistItem(checklist.id, item.id);
-                    }}
+                    onClick={() =>
+                      handleDeleteChecklistItem(checklist.id, item.id)
+                    }
                   >
-                    <DeleteForeverOutlined sx={{ color: "red" }} />
+                    <DeleteForeverOutlined color="error" />
                   </IconButton>
                 </ListItem>
               ))}
             </List>
 
             {/* Add Item to Checklist */}
-            <Box display="flex" gap={1} mt={2}>
+            <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
               <TextField
                 size="small"
                 placeholder="Add an item"
                 value={newItemNames[checklist.id] || ""}
                 onChange={(e) =>
-                  handleNewItemNameChange(checklist.id, e.target.value)
+                  dispatch(
+                    setNewItemName({
+                      checklistId: checklist.id,
+                      value: e.target.value,
+                    })
+                  )
                 }
                 fullWidth
               />
               <Button
                 variant="contained"
                 onClick={() => handleAddChecklistItem(checklist.id)}
-                sx={{ whiteSpace: "nowrap" }}
               >
                 Add
               </Button>
@@ -195,17 +182,17 @@ const TaskDetailsModal = ({ task, open, onClose }) => {
           </Box>
         ))}
 
-        {/* Create New Checklist */}
+        {/* Add New Checklist */}
         <Box sx={{ mt: 3, pt: 2, borderTop: "1px solid #e0e0e0" }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+          <Typography variant="subtitle1" fontWeight={600} mb={1}>
             Add Checklist
           </Typography>
-          <Box display="flex" gap={1}>
+          <Box sx={{ display: "flex", gap: 1 }}>
             <TextField
               size="small"
               placeholder="Checklist title"
               value={newChecklistName}
-              onChange={handleNewChecklistNameChange}
+              onChange={(e) => dispatch(setNewChecklistName(e.target.value))}
               fullWidth
             />
             <Button variant="contained" onClick={handleAddChecklist}>
