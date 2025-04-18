@@ -10,6 +10,7 @@ This project is a **Trello clone** built using React, Material UI, and Vite. It 
 - **Checklists:** Each card can have one or more checklists with items that can be toggled, added, or deleted.
 - **Modals:** Task details and checklist management are handled via modals.
 - **Centralized State Management:** Uses React Context and useReducer to share state across components.
+- **State Management:** Centralized global state via Redux Toolkit (slices for boards and checklists).
 - **Responsive Design:** Implemented using Material UI’s sx prop and custom styles.
 - **API Integration:** Communicates with the Trello API for boards, lists, cards, and checklists.
 
@@ -19,43 +20,40 @@ This project is a **Trello clone** built using React, Material UI, and Vite. It 
 - **Material UI** – Component library for designing the UI.
 - **Vite** – Fast development server and build tool.
 - **React Router** – For client-side routing.
+- **State Management:** Redux Toolkit, React‑Redux
 - **Axios** – For API requests.
 - **Context API & useReducer** – For state management.
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 trello-react-sameer/
-├── node_modules/
-├── public/
-│   ├── index.html
-│   ├── favicon.ico
-│   └── trello-icon.png
-├── src/
-│   ├── components/
-│   │   ├── AddTaskList/
-│   │   │   └── AddTaskList.jsx
-│   │   ├── BoardAppBar/
-│   │   │   └── BoardAppBar.jsx
-│   │   ├── common/
-│   │   │   └── Header.jsx
-│   │   ├── modals/
-│   │   │   └── TaskDetailsModal.jsx
-│   │   ├── TaskItem.jsx
-│   │   └── TaskList.jsx
-│   ├── context/
-│   │   └── TaskDetailsContext.jsx
-│   ├── pages/
-│   │   └── Board.jsx
-│   ├── services/
-│   │   └── trelloApi.js
-│   ├── App.jsx
-│   └── index.jsx
-├── .env                      # Contains environment variables (API keys, etc.)
-├── .gitignore                # Ensure .env is listed here
-├── package.json
-└── README.md
+├─ public/                 # Static assets (favicon, index.html)
+├─ src/
+│  ├─ assets/              # Images, icons
+│  ├─ components/          # Reusable UI components
+│  │  ├─ common/           # Header, Popovers, Modals
+│  │  ├─ BoardCard/        # Board tile component
+│  │  ├─ TaskList/         # List & card components
+│  │  └─ TaskItem/         # Single task item
+│  ├─ features/            # Redux slices
+│  │  ├─ boards/           # boardsSlice.js, thunks
+│  │  └─ taskDetails/      # taskDetailsSlice.js, thunks
+│  ├─ hooks/               # Custom hooks (e.g. useAuth)
+│  ├─ pages/               # Route pages (Home.page.jsx, Board.page.jsx)
+│  ├─ services/            # API wrappers (trelloApi.js)
+│  ├─ store.js             # Redux store configuration
+│  ├─ theme.js             # MUI theme configuration
+│  ├─ App.jsx              # Router setup
+│  └─ main.jsx             # App entry point
+├─ .env.example            # Sample env file
+├─ .eslintrc.js            # ESLint config
+├─ tailwind.config.cjs     # Tailwind config
+├─ vite.config.js          # Vite config
+└─ README.md
 ```
+
+---
 
 ## Getting Started
 
