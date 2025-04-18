@@ -15,11 +15,11 @@ import { useSelector, useDispatch } from "react-redux";
 import { createBoard, fetchBoards } from "../../features/boards/BoardSlice";
 
 const backgroundOptions = [
-  "https://trello-backgrounds.s3.amazonaws.com/SharedBackground/480x320/6566fcc49ee3c03f225dc13229ffb5af/photo-1742156345582-b857d994c84e.webp",
-  "https://d2k1ftgv7pobq7.cloudfront.net/images/backgrounds/cosmos/small.jpg",
-  "https://d2k1ftgv7pobq7.cloudfront.net/images/backgrounds/canyon/small.jpg",
-  "https://d2k1ftgv7pobq7.cloudfront.net/images/backgrounds/ocean/small.jpg",
-  "https://d2k1ftgv7pobq7.cloudfront.net/images/backgrounds/river/small.jpg",
+  "https://images.unsplash.com/photo-1741812191037-96bb5f12010a?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=400",
+  "https://images.unsplash.com/photo-1742937163916-78fd07cc3b49?ixlib=rb-4.0.3\u0026q=85\u0026fm=jpg\u0026crop=entropy\u0026cs=srgb&w=400",
+  "https://images.unsplash.com/photo-1742845918430-c6093f93f740?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=400",
+  "https://images.unsplash.com/photo-1742105682489-94149abb1009?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=400",
+  "https://images.unsplash.com/photo-1741936428950-3f66f0a69320?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=400",
 ];
 
 const BackgroundThumbnail = styled("img")({

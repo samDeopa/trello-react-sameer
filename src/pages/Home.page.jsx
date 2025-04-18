@@ -1,7 +1,7 @@
 import { Container } from "@mui/material";
 import Header from "../components/common/Header";
 import WorkSpace from "../components/WorkSpace/WorkSpace";
-import populateTrello from "../scripts/populateTrello";
+// import populateTrello from "../scripts/populateTrello";
 
 const Home = () => {
   return (
@@ -10,14 +10,14 @@ const Home = () => {
       <Container maxWidth="md" sx={{ display: "flex" }}>
         <WorkSpace />
       </Container>
-      <button
+      {/* <button
         onClick={() => {
           populateTrello();
         }}
         className="bg-amber-100"
       >
         Pouplate Trello
-      </button>
+      </button> */}
     </>
   );
 };

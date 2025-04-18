@@ -19,8 +19,11 @@ export const createBoard = (board) => {
   return trelloApi.post(`/boards/`, {
     name: board.title,
     defaultLists: false,
-    prefs_background_url:
-      "https://images.unsplash.com/photo-1742937163916-78fd07cc3b49?ixlib=rb-4.0.3\u0026q=85\u0026fm=jpg\u0026crop=entropy\u0026cs=srgb",
+    //removing the w=400 parameter from the imageURL
+    prefs_background_url: board.prefs_background.substring(
+      0,
+      board.prefs_background.length - 6
+    ),
     prefs_permissionLevel: "org",
   });
 };
