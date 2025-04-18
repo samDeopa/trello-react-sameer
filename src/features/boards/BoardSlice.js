@@ -63,5 +63,4 @@ const boardsSlice = createSlice({
   },
 });
 
-export const { addBoard } = boardsSlice.actions;
 export default boardsSlice.reducer;
